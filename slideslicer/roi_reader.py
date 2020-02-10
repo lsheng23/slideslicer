@@ -141,7 +141,7 @@ class RoiReader():
                          when saving to provided `outdir`
                          (1 -- filename only; 2 -- incl 1 directory)
         """
-        self.filenamebase = re.sub('.svs$','', re.sub(".xml$", "", inputfile))
+        self.filenamebase = re.sub('.(svs|tif)$','', re.sub(".xml$", "", inputfile))             ######### Place changed 
         self.verbose = verbose
         ############################
         # parsing annotations
