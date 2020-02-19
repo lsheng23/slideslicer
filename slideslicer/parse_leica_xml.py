@@ -5,9 +5,9 @@ import lxml.etree
 
 def _parse_vertices_(reg):
     # the query returns a list of strings
-    vertices_x = reg.xpath('Vertices/Vertex/@X')
-    vertices_y = reg.xpath('Vertices/Vertex/@Y')
-    
+    vertices_x = reg.xpath('Coordinates/Coordinate/@X')
+    vertices_y = reg.xpath('Coordinates/Coordinate/@Y')
+
     # convert strings to integers 
     # and pair them into [(x1, y2), (x2, y2), ... ] format
     vertices = (list(zip((float(x) for x in vertices_x),
@@ -15,20 +15,13 @@ def _parse_vertices_(reg):
     return vertices
 
 
-def _parse_xml_region_all_attrs_(reg, vertices_np=False, name=None):
+def _parse_xml_region_all_attrs_(reg, vertices_np=False):
     attrs = dict(reg.attrib)
-    types_ = {'Id':int,
-              'Type':int,
-               'NegativeROA': int,
-               'Analyze': int,
-               'InputRegionId': int,
-               'DisplayId': int,
-               'ImageFocus': int,
-               'Selected':int,
-               'Zoom': float, 
-               'Length': float,
+    types_ = {'Name':str,
+              'Type':str,
+               'PartOfGroup': str,
+               'Color': str,
                'Area': float,
-               'LengthMicrons': float,
                'AreaMicrons': float,
                }
     for kk,vv in attrs.items():
@@ -42,9 +35,9 @@ def _parse_xml_region_all_attrs_(reg, vertices_np=False, name=None):
 #    for kk ['Id', 'Text', 'Area']:
 #        vv = attrs[kk]
 #        vv = int(vv) if len(vv)>0 else -1
-#        attrs[kk] = vv
-    if name is not None and (attrs['Text'] is None or attrs['Text']==''):
-        attrs['Text'] = name
+# #        attrs[kk] = vv
+#     if name is not None and (attrs['Text'] is None or attrs['Text']==''):
+#         attrs['Text'] = name
     attrs['Vertices'] = _parse_vertices_(reg)
     if vertices_np:
         attrs['Vertices'] = np.asarray(attrs['Vertices'])
@@ -53,19 +46,18 @@ def _parse_xml_region_all_attrs_(reg, vertices_np=False, name=None):
 
 def _parse_xml_region_(reg):
     "parse a `region` element from Leica annotation XML"
-    tag = reg.xpath('./@Text')
+    tag = reg.xpath('./@Type')                       # tag is the type here
     tag = (tag[0]) if len(tag)>0 else -1
     
-    id_ = reg.xpath('./@Id')
-    id_ = int(id_[0]) if len(id_)>0 else -1
+    id_ = reg.xpath('./@Name')                        # id is the Name here
+    id_ = int(id_.split(' ')[1]) if len(id_)>0 else -1
 
-    area = reg.xpath('./@Area')
-    area = float(area[0]) if len(area)>0 else -1.0
+    # area = reg.xpath('./@Area')
+    # area = float(area[0]) if len(area)>0 else -1.0
     
     return {"id": id_,
            "tag": tag,
            "vertices": vertices,
-           "area": area,
           }
 
 def parse_xml2annotations(fnxml):
@@ -84,16 +76,16 @@ def parse_xml2annotations(fnxml):
 
     annotations = root.xpath('//*/Annotation')
     for ann in annotations:
-        try:
-            attrbs = ann.xpath('./Attributes')[0]
-            attrb = attrbs.xpath('''./Attribute[contains(@Name,'Description')]''')[0]
-            name = attrb.xpath('./@Value')
-            name = name[0]
-        except:
-            name = None
+        # try:
+        #     attrbs = ann.xpath('./Attributes')[0]
+        #     attrb = attrbs.xpath('''./Attribute[contains(@Name,'Description')]''')[0]
+        #     name = attrb.xpath('./@Value')
+        #     name = name[0]
+        # except:
+        #     name = None
         # Get all "Region" elements in the tree
-        for reg in ann.xpath('./*/Region'):
-            rois.append(_parse_xml_region_all_attrs_(reg, name=name))
+        #for reg in ann.xpath('./*/Region'):
+        rois.append(_parse_xml_region_all_attrs_(ann))
     return rois
 
 # legacy

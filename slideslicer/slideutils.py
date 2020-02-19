@@ -84,7 +84,7 @@ def map_countour_bbox(contour, slide_dimensions,
 
 def get_median_color(slide):
     return np.apply_over_axes(np.median, 
-                              np.asarray(slide.associated_images["thumbnail"]),
+                              np.asarray(slide.get_thumbnail((500,500))),
                               [0,1]).ravel()
 
 
@@ -147,7 +147,7 @@ def get_roi_dict(contour, name='tissue', id=0, sq_micron_per_pixel=None):
     """input: 
         contour: numpy array
     """
-    cdict = {'id':id, 
+    cdict = {'id': id, 
             'name': name,
             'type':0,
             'vertices':contour.tolist(),
@@ -214,7 +214,7 @@ def get_chunk_countours(img, color=False, filtersize=7, minlen = 100):
 def get_thumbnail_magnification(slide):
     """get ratio of magnified / thumbnail dimension
     assumes no isotropic scaling (indeed it is slightly anisotropic)"""
-    ratio = np.asarray(slide.dimensions) / np.asarray(slide.associated_images["thumbnail"].size)
+    ratio = np.asarray(slide.dimensions) / np.asarray(slide.get_thumbnail((500,500)).size)
      # np.sqrt(np.prod(ratio))
     return ratio
 
