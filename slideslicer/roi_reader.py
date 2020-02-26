@@ -130,7 +130,7 @@ class RoiReader():
         extract and save rois
 
         Inputs:
-        inputfile     -- xml or svs file path
+        inputfile     -- whole slide imaging file path
         remove_empty  -- remove empty chunks of tissue
                           - True:   remove
                           - False:  don't remove
@@ -141,6 +141,7 @@ class RoiReader():
                          when saving to provided `outdir`
                          (1 -- filename only; 2 -- incl 1 directory)
         """
+	self.inputfile = inputfile
         self.filenamebase = re.sub('.(svs|tif)$','', re.sub(".xml$", "", inputfile))             ######### Place changed 
         self.verbose = verbose
         ############################
@@ -186,8 +187,7 @@ class RoiReader():
 
     @property
     def slide(self):
-        fnsvs = self.filenamebase + ".svs"
-        slide_ = openslide.OpenSlide(fnsvs)
+        slide_ = openslide.OpenSlide(self.inputfile)
         return slide_
 
 
